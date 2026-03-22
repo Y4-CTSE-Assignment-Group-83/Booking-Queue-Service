@@ -10,11 +10,18 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "*", // allow gateway + frontend
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Test route
+// Root route
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -22,8 +29,18 @@ app.get("/", (req, res) => {
   });
 });
 
-// Swagger docs
-swaggerDocs(app);
+// ✅ Health check (VERY IMPORTANT for API Gateway / Docker / Cloud)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    service: "Booking & Queue Service",
+    status: "Healthy",
+  });
+});
+
+// Swagger only in development
+if (process.env.NODE_ENV !== "production") {
+  swaggerDocs(app);
+}
 
 // Routes
 app.use("/api/bookings", bookingRoutes);

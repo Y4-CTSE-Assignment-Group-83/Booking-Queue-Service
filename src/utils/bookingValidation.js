@@ -4,14 +4,12 @@ export const createBookingValidation = [
   body("customerName")
     .notEmpty()
     .withMessage("Customer name is required")
-    .isLength({ min: 3 })
-    .withMessage("Customer name must be at least 3 characters"),
+    .isLength({ min: 3 }),
 
   body("customerPhone")
     .notEmpty()
     .withMessage("Customer phone is required")
-    .isLength({ min: 10 })
-    .withMessage("Customer phone must be at least 10 characters"),
+    .isLength({ min: 10 }),
 
   body("customerEmail")
     .optional({ checkFalsy: true })
@@ -20,32 +18,44 @@ export const createBookingValidation = [
 
   body("serviceId")
     .notEmpty()
-    .withMessage("Service ID is required")
-    .isMongoId()
-    .withMessage("Service ID must be a valid Mongo ID"),
+    .withMessage("Service ID is required"),
+
+  body("serviceName")
+    .notEmpty()
+    .withMessage("Service name is required"),
+
+  body("serviceCategory")
+    .notEmpty()
+    .withMessage("Service category is required"),
+
+  body("servicePrice")
+    .notEmpty()
+    .withMessage("Service price is required")
+    .isNumeric(),
+
+  body("serviceDuration")
+    .notEmpty()
+    .withMessage("Service duration is required")
+    .isNumeric(),
 
   body("appointmentDate")
     .notEmpty()
     .withMessage("Appointment date is required")
-    .isISO8601()
-    .withMessage("Appointment date must be a valid date"),
+    .isISO8601(),
 
   body("notes")
     .optional()
-    .isLength({ max: 500 })
-    .withMessage("Notes must not exceed 500 characters"),
+    .isLength({ max: 500 }),
 ];
 
 export const updateBookingStatusValidation = [
-  param("id").isMongoId().withMessage("Booking ID must be valid"),
+  param("id").isMongoId(),
 
   body("status")
     .notEmpty()
-    .withMessage("Status is required")
-    .isIn(["Pending", "Confirmed", "In Progress", "Completed", "Cancelled"])
-    .withMessage("Invalid booking status"),
+    .isIn(["Pending", "Confirmed", "In Progress", "Completed", "Cancelled"]),
 ];
 
 export const bookingIdValidation = [
-  param("id").isMongoId().withMessage("Booking ID must be valid"),
+  param("id").isMongoId(),
 ];

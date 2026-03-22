@@ -1,6 +1,5 @@
 import Booking from "../models/bookingModel.js";
-import { getServiceByIdFromCatalog } from "../services/serviceCatalogClient.js";
-import { generateQueueNumber, getDateKey } from "../utils/queueGenerator.js";
+import { generateQueueNumber } from "../utils/queueGenerator.js";
 
 /*
 -----------------------------------------
@@ -15,17 +14,13 @@ export const createBooking = async (req, res, next) => {
       customerPhone,
       customerEmail,
       serviceId,
+      serviceName,
+      serviceCategory,
+      servicePrice,
+      serviceDuration,
       appointmentDate,
       notes,
     } = req.body;
-
-    const service = await getServiceByIdFromCatalog(serviceId);
-
-    if (!service.isAvailable) {
-      const error = new Error("Selected service is currently unavailable");
-      error.statusCode = 400;
-      throw error;
-    }
 
     const { queueDate, queueNumber } = await generateQueueNumber(appointmentDate);
 
@@ -33,11 +28,11 @@ export const createBooking = async (req, res, next) => {
       customerName,
       customerPhone,
       customerEmail,
-      serviceId: service._id,
-      serviceName: service.name,
-      serviceCategory: service.category,
-      servicePrice: service.price,
-      serviceDuration: service.duration,
+      serviceId,
+      serviceName,
+      serviceCategory,
+      servicePrice,
+      serviceDuration,
       appointmentDate,
       queueDate,
       queueNumber,
@@ -58,7 +53,6 @@ export const createBooking = async (req, res, next) => {
 -----------------------------------------
 Get all bookings
 GET /api/bookings
-Optional query: ?date=YYYY-MM-DD&status=Pending
 -----------------------------------------
 */
 export const getAllBookings = async (req, res, next) => {
@@ -66,13 +60,8 @@ export const getAllBookings = async (req, res, next) => {
     const { date, status } = req.query;
     const filter = {};
 
-    if (date) {
-      filter.queueDate = date;
-    }
-
-    if (status) {
-      filter.status = status;
-    }
+    if (date) filter.queueDate = date;
+    if (status) filter.status = status;
 
     const bookings = await Booking.find(filter).sort({
       appointmentDate: 1,
