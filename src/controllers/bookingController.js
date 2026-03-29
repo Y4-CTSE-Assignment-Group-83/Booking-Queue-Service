@@ -22,7 +22,20 @@ export const createBooking = async (req, res, next) => {
       notes,
     } = req.body;
 
-    const { queueDate, queueNumber } = await generateQueueNumber(appointmentDate);
+    // 🔥 TIME VALIDATION
+    const bookingTime = new Date(appointmentDate);
+    const hours = bookingTime.getHours();
+
+    if (hours < 9 || hours >= 20) {
+      const error = new Error(
+        "Bookings allowed only between 9:00 AM and 8:00 PM"
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const { queueDate, queueNumber } =
+      await generateQueueNumber(appointmentDate);
 
     const booking = await Booking.create({
       customerName,
@@ -44,6 +57,7 @@ export const createBooking = async (req, res, next) => {
       message: "Booking created successfully",
       data: booking,
     });
+
   } catch (error) {
     next(error);
   }
@@ -156,6 +170,60 @@ export const deleteBooking = async (req, res, next) => {
       success: true,
       message: "Booking deleted successfully",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+/*
+-----------------------------------------
+Update booking date
+PATCH /api/bookings/:id/update
+-----------------------------------------
+*/
+export const updateBookingDate = async (req, res, next) => {
+  try {
+    const { appointmentDate } = req.body;
+
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    // 🔥 Only allow update if PENDING
+    if (booking.status !== "PENDING") {
+      return res.status(400).json({
+        success: false,
+        message: "Only pending bookings can be updated",
+      });
+    }
+
+    // 🔥 TIME VALIDATION AGAIN
+    const bookingTime = new Date(appointmentDate);
+    const hours = bookingTime.getHours();
+
+    if (hours < 9 || hours >= 20) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking allowed only between 9AM - 8PM",
+      });
+    }
+
+    booking.appointmentDate = appointmentDate;
+
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Booking updated successfully",
+      data: booking,
+    });
+
   } catch (error) {
     next(error);
   }

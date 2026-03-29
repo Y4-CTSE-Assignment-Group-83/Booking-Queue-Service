@@ -5,6 +5,7 @@ import {
   getBookingById,
   updateBookingStatus,
   deleteBooking,
+  updateBookingDate,
 } from "../controllers/bookingController.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import {
@@ -126,5 +127,8 @@ router.patch(
  *         description: Booking deleted
  */
 router.delete("/:id", bookingIdValidation, validateRequest, deleteBooking);
+
+
+router.patch("/:id/update", updateBookingDate);
 
 export default router;

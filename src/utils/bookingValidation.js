@@ -53,7 +53,7 @@ export const updateBookingStatusValidation = [
 
   body("status")
     .notEmpty()
-    .isIn(["Pending", "Confirmed", "In Progress", "Completed", "Cancelled"]),
+    .isIn(["PENDING", "CONFIRMED", "INPROGRESS", "COMPLETED", "CANCELED"]),
 ];
 
 export const bookingIdValidation = [
